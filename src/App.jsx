@@ -9,18 +9,23 @@ function App() {
   ]);
 
   return (
-    <>
+    <div className="app-container">
       <TodoList todoList={todoList} setTodoList={setTodoList} />
       <hr />
       <TodoInput todoList={todoList} setTodoList={setTodoList} />
-    </>
+    </div>
   );
+}
+
+function Header() {
+    return <h1 className="header">Todo List!</h1>
 }
 
 function TodoInput({ todoList, setTodoList }) {
   const [inputValue, setInputValue] = useState("");
 
   return (
+    <div className="todo-input">
     <>
       <input
         value={inputValue}
@@ -37,12 +42,13 @@ function TodoInput({ todoList, setTodoList }) {
         추가하기
       </button>
     </>
+    </div>
   );
 }
 
 function TodoList({ todoList, setTodoList }) {
   return (
-    <ul>
+    <ul className="todo-list">
       {todoList.map((todo) => (
         <Todo key={todo.id} todo={todo} setTodoList={setTodoList} />
       ))}
@@ -51,35 +57,62 @@ function TodoList({ todoList, setTodoList }) {
 }
 
 function Todo({ todo, setTodoList }) {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(todo.content);
+  const [isEdit, setIsEdit] = useState(false);
+
+  const handleDoneToggle = () => {
+    setTodoList((prev) =>
+      prev.map((el) =>
+        el.id === todo.id ? { ...el, done: !el.done } : el
+      )
+    );
+  };
+
+  const handleEdit = () => {
+    setTodoList((prev) =>
+      prev.map((el) =>
+        el.id === todo.id ? { ...el, content: inputValue } : el
+      )
+    );
+    setIsEdit(false);
+  }; 
+
   return (
-    <li>
-      {todo.content}
-      <input
-        value={inputValue}
-        onChange={(event) => setInputValue(event.target.value)}
-      />
-      <button
-        onClick={() => {
-          setTodoList((prev) =>
-            prev.map((el) =>
-              el.id === todo.id ? { ...el, content: inputValue } : el
-            )
-          );
-        }}
-      >
-        수정
+    <li className={`todo-item ${todo.done ? "done" : ""}`}>
+    <div className="todo-left">
+      <input type="checkbox" checked={todo.done} onChange={handleDoneToggle} />
+      {isEdit ? (
+        <input
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+        />
+      ) : (
+        <span>{todo.content}</span>
+      )}
+    </div>
+  
+    <div className="todo-actions">
+      <button className="edit-button" onClick={() => setIsEdit(!isEdit)}>
+        ✏️ 수정
       </button>
+  
+      {isEdit && (
+        <button className="save-button" onClick={handleEdit}>
+          💾 저장
+        </button>
+      )}
+  
       <button
-        onClick={() => {
-          setTodoList((prev) => {
-            return prev.filter((el) => el.id !== todo.id);
-          });
-        }}
+        className="delete-button"
+        onClick={() =>
+          setTodoList((prev) => prev.filter((el) => el.id !== todo.id))
+        }
       >
-        삭제
+        🗑️ 삭제
       </button>
-    </li>
+    </div>
+  </li>
+  
   );
 }
 
